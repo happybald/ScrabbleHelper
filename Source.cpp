@@ -259,7 +259,7 @@ void clearImg() {
 	rect.top = 0;
 	rect.left = 0;
 	rect.bottom = 2000;
-	rect.right = 1250;
+	rect.right = 1920;
 	FillRect(hdc, &rect, CreateSolidBrush(RGB(0, 0, 0)));
 	gotoxy(0, 0);
 }
@@ -312,13 +312,15 @@ void initTable(char **table, int size) {
 }
 void drawTable(char **table, bool text) {
 	char *n = new char[15];
+	SetBkMode(hdc,TRANSPARENT);
+	SetTextColor(hdc,RGB(255, 0, 0));
 	if (text == 1) {
 		for (int x = 1251, i = 0; x < 1461; i++, x += 30) {
 			_itoa(i, n, 15);
-			TextOut(hdc, x + 4, 25, n , 1);
+			TextOut(hdc, x + 5, 25, n , 1);
 			for (int y = 40, j = 0; y < 250; j++, y += 30) {
-			_itoa(j, n, 15);
-			TextOut(hdc, 1251 - 5, y + 3, n, 1);
+				n[0] = 65 + j;
+			TextOut(hdc, 1251 - 15, y + 6, n, 1);
 			TextOut(hdc, x + 6, y + 6, *(table + j) + i, 1);
 			}
 		}
@@ -330,10 +332,10 @@ void drawTable(char **table, bool text) {
 		Rectangle(hdc, 1251, 40, 1461, 250);
 		for (int x = 1251, i = 0; x < 1461; i++, x += 30) {
 			_itoa(i, n, 15);
-			TextOut(hdc, x + 4, 25, n, 1);
+			TextOut(hdc, x + 5, 25, n, 1);
 			for (int y = 40, j = 0; y < 250; j++, y += 30) {
-				_itoa(j, n, 15);
-				TextOut(hdc, 1251 - 5, y + 3, n, 1);
+				n[0] = 65 + j;
+				TextOut(hdc, 1251 - 15, y + 6, n, 1);
 				Rectangle(hdc, x, y, x + 30, y + 30);
 				TextOut(hdc, x + 6, y + 6, *(table + j) + i, 1);
 			}
@@ -341,82 +343,62 @@ void drawTable(char **table, bool text) {
 		TextOut(hdc, 1431 + 6, 220 + 6, *(table + 6) + 6, 1);
 		DeleteObject(rectangle);
 	}
+	SetBkMode(hdc, OPAQUE);
 }
-
-void TableCross(char **table, char *letters) {
-	drawTable(table,0);
-	int iKey = 0;
-	bool tab[7][7] = { 0 };
-	int Select = 0;
-	HBRUSH rectangle = CreateSolidBrush(RGB(0, 150, 0));
-	SelectObject(hdc, rectangle);
-	Rectangle(hdc, 1251, 40, 1251 + 30, 250);
-	drawTable(table, 1);
-	SelectObject(hdc, rectangle);
-	while (iKey != KEY_ENTER){
-		if (_kbhit()) {
-			iKey = _getch();
-			switch (iKey) {
-			case KEY_LEFT: {
-				if (Select > 0) {
-					drawTable(table,0);
-					Select--;
-					SelectObject(hdc, rectangle);
-					Rectangle(hdc, 1251 + Select * 30, 40, 1251 + Select * 30 + 30, 250);
-					drawTable(table, 1);
-					SelectObject(hdc, rectangle);
-				}
-				break;
-			}
-			case KEY_RIGHT: {
-				if (Select < 6) {
-					drawTable(table,0);
-					Select++;
-					SelectObject(hdc, rectangle);
-					Rectangle(hdc, 1251 + Select * 30, 40, 1251 + Select * 30 + 30, 250);
-					drawTable(table, 1);
-					SelectObject(hdc, rectangle);
-				}
-				break;
-			}
-			case KEY_ENTER: {
-				break;
-			}
-			}
-		}
-	}
-	int i = Select;
-	Select = 0;
-	iKey = 0;
+COORD TableCross(char **table, char *letters) {
 	drawTable(table, 0);
+	int iKey = 0;
+	int i = 3;
+	int j = 3;
+	HBRUSH rectangle = CreateSolidBrush(RGB(0, 0, 0));
 	SelectObject(hdc, rectangle);
-	Rectangle(hdc, 1251, 40, 1461, 40 + 30);
+	Rectangle(hdc, 1251 + i * 30, 40 + j * 30, 1251 + i * 30 + 30, 40 + j * 30 + 30);
 	drawTable(table, 1);
 	SelectObject(hdc, rectangle);
 	while (iKey != KEY_ENTER) {
 		if (_kbhit()) {
 			iKey = _getch();
 			switch (iKey) {
-			case KEY_UP: {
-				if (Select > 0) {
-					drawTable(table,0);
-					Select--;
+			case KEY_LEFT: {
+				if (j > 0) {
+					drawTable(table, 0);
+					j--;
 					SelectObject(hdc, rectangle);
-					Rectangle(hdc, 1251, 40 + 30 * Select, 1461, 40 + Select * 30 + 30);
+					Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
+					drawTable(table, 1);
+					SelectObject(hdc, rectangle);
+				}
+				break;
+			}
+			case KEY_RIGHT: {
+				if (j < 6) {
+					drawTable(table, 0);
+					j++;
+					SelectObject(hdc, rectangle);
+					Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
+					drawTable(table, 1);
+					SelectObject(hdc, rectangle);
+				}
+				break;
+			}case KEY_UP: {
+				if (i > 0) {
+					drawTable(table, 0);
+					i--;
+					SelectObject(hdc, rectangle);
+					Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
 					drawTable(table, 1);
 					SelectObject(hdc, rectangle);
 				}
 				break;
 			}
 			case KEY_DOWN: {
-				if (Select < 6) {
-					drawTable(table,0);
-					Select++;
+				if (i < 6) {
+					drawTable(table, 0);
+					i++;
 					SelectObject(hdc, rectangle);
-					Rectangle(hdc, 1251, 40 + 30 * Select, 1461, 40 + Select * 30 + 30);
+					Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
 					drawTable(table, 1);
 					SelectObject(hdc, rectangle);
-
 				}
 				break;
 			}
@@ -426,10 +408,194 @@ void TableCross(char **table, char *letters) {
 			}
 		}
 	}
-	cout << i << "   " << Select << endl;
+	COORD ret;
+	ret.X = i;
+	ret.Y = j;
 	DeleteObject(rectangle);
+	return ret;
 }
-
+void SelectWordOnTable(char**table, char*lettres) {
+	bool tab[7][7] = { 0 };
+	HBRUSH rectangle = CreateSolidBrush(RGB(0, 0, 0));
+	HBRUSH def = CreateSolidBrush(RGB(255, 255, 255));
+	HBRUSH selectR = CreateSolidBrush(RGB(0, 200, 0));
+	int i = 3;
+	int j = 3;
+	SelectObject(hdc, rectangle);
+	Rectangle(hdc, 1251 + i * 30, 40 + j * 30, 1251 + i * 30 + 30, 40 + j * 30 + 30);
+	drawTable(table, 1);
+	int iKey = 0;
+	while (iKey != KEY_ENTER) {
+		if (_kbhit()) {
+			iKey = _getch();
+			switch (iKey) {
+			case KEY_LEFT: {
+				if (j > 0) {
+					drawTable(table, 0);
+					j--;
+					SelectObject(hdc, rectangle);
+					Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
+					drawTable(table, 1);
+					SelectObject(hdc, rectangle);
+				}
+				break;
+			}
+			case KEY_RIGHT: {
+				if (j < 6) {
+					drawTable(table, 0);
+					j++;
+					SelectObject(hdc, rectangle);
+					Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
+					drawTable(table, 1);
+					SelectObject(hdc, rectangle);
+				}
+				break;
+			}case KEY_UP: {
+				if (i > 0) {
+					drawTable(table, 0);
+					i--;
+					SelectObject(hdc, rectangle);
+					Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
+					drawTable(table, 1);
+					SelectObject(hdc, rectangle);
+				}
+				break;
+			}
+			case KEY_DOWN: {
+				if (i < 6) {
+					drawTable(table, 0);
+					i++;
+					SelectObject(hdc, rectangle);
+					Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
+					drawTable(table, 1);
+					SelectObject(hdc, rectangle);
+				}
+				break;
+			}
+			case KEY_ENTER: {
+				break;
+			}
+			}
+		}
+	}
+	SelectObject(hdc, selectR);
+	iKey = 0;
+	Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
+	drawTable(table, 1);
+	tab[i][j] = 2;
+	COORD cent;
+	cent.X = i;
+	cent.Y = j;
+	Sleep(50);
+	while (iKey != KEY_ENTER) {
+		if (_kbhit()) {
+			iKey = _getch();
+			switch (iKey) {
+			case KEY_LEFT: {
+				if (j > 0 && tab[i][j - 1] == 0) {
+					drawTable(table, 1);
+					j--;
+					tab[i][j] = 1;
+					SelectObject(hdc, selectR);
+					Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
+					drawTable(table, 1);
+					SelectObject(hdc, selectR);
+				}
+				else {
+					if (j > 0 && tab[i][j - 1] == 1) {
+						drawTable(table, 1);
+						SelectObject(hdc, def);
+						Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
+						tab[i][j] = 0;
+						j--;
+						drawTable(table, 1);
+						SelectObject(hdc, def);
+					}
+				}
+				break;
+			}
+			case KEY_RIGHT: {
+				if (j < 6 && tab[i][j + 1] == 0) {
+					drawTable(table, 1);
+					j++;
+					tab[i][j] = 1;
+					SelectObject(hdc, selectR);
+					Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
+					drawTable(table, 1);
+					SelectObject(hdc, selectR);
+				}
+				else {
+					if (j < 6 && tab[i][j + 1] == 1) {
+						drawTable(table, 1);
+						SelectObject(hdc, def);
+						Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
+						tab[i][j] = 0;
+						j++;
+						drawTable(table, 1);
+						SelectObject(hdc, def);
+					}
+				}
+				break;
+			}
+			case KEY_UP: {
+				if (i > 0 && tab[i - 1][j] == 0) {
+					drawTable(table, 1);
+					i--;
+					tab[i][j] = 1;
+					SelectObject(hdc, selectR);
+					Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
+					drawTable(table, 1);
+					SelectObject(hdc, selectR);
+				}
+				else {
+					if (i > 0 && tab[i - 1][j] == 1) {
+						drawTable(table, 1);
+						SelectObject(hdc, def);
+						Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
+						tab[i][j] = 0;
+						i--;
+						drawTable(table, 1);
+						SelectObject(hdc, def);
+					}
+				}
+				break;
+			}
+			case KEY_DOWN: {
+				if (i < 6 && tab[i + 1][j] == 0) {
+					drawTable(table, 1);
+					i++;
+					tab[i][j] = 1;
+					SelectObject(hdc, selectR);
+					Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
+					drawTable(table, 1);
+					SelectObject(hdc, selectR);
+				}
+				else {
+					if (i < 6 && tab[i + 1][j] == 1) {
+						drawTable(table, 1);
+						SelectObject(hdc, def);
+						Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
+						tab[i][j] = 0;
+						i++;
+						drawTable(table, 1);
+						SelectObject(hdc, def);
+					}
+				}
+				break;
+			}
+			case KEY_ENTER: {
+				break;
+			}
+			}
+		}
+	}
+	for (int i = 0; i < 7; i++) {
+		for (int j = 0; j < 7; j++) {
+			cout << tab[i][j] << "  ";
+		}
+		cout << endl;
+	}
+}
 
 int main(int argc, char *argv[]) {
 	SetConsoleTitle("Scrabble Helper");
@@ -490,7 +656,7 @@ int main(int argc, char *argv[]) {
 					count++;
 				}
 			}
-			if (word[strlen(word) - 1] == temp[strlen(temp) - 1]) {
+			if (word[strlen(word) - 1] == '*' || word[strlen(word) - 1] == temp[strlen(temp) - 1]) {
 				ind = true;
 			}
 			if ((count >= (strlen(temp) - wanted)) && ind == true) {
@@ -512,7 +678,7 @@ int main(int argc, char *argv[]) {
 		cout << " 1 - Enter new Word" << endl;
 		cout << " 2 - Show best variant" << endl;
 		cout << " 3 - Show all variants" << endl;
-		cout << " 4 - Re-enter letters and word" << endl;
+		cout << " 4 - Drop on table" << endl;
 		SetColor(White, Black);
 		cin >> ind;
 		switch (ind) {
@@ -555,7 +721,10 @@ int main(int argc, char *argv[]) {
 		case 4:{
 			clearImg();
 			drawTable(table, 0);
-			TableCross(table, letters);
+			COORD Selected = TableCross(table, letters);
+			cout << Selected.X << "  " << Selected.Y;
+			drawTable(table, 0);
+			SelectWordOnTable(table, letters);
 			break;
 		}
 		default:
