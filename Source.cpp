@@ -60,6 +60,41 @@ struct Node* swap(struct Node* ptr1, struct Node* ptr2)
 	ptr1->next = tmp;
 	return ptr2;
 }
+void drawTable(char **table, bool text) {
+	char *n = new char[15];
+	SetBkMode(hdc,TRANSPARENT);
+	SetTextColor(hdc,RGB(255, 0, 0));
+	if (text == 1) {
+		for (int x = 1251, i = 0; x < 1251+30* TABLE_SIZE; i++, x += 30) {
+			_itoa(i, n, 15);
+			TextOut(hdc, x + 5, 25, n , 1);
+			for (int y = 40, j = 0; y < 40 + 30 * TABLE_SIZE; j++, y += 30) {
+				n[0] = 65 + j;
+				TextOut(hdc, 1251 - 15, y + 6, n, 1);
+				TextOut(hdc, x + 6, y + 6, *(table + j) + i, 1);
+			}
+		}
+		TextOut(hdc, 1251 + 30 * TABLE_SIZE - 30 + 6, 40 + 30 * TABLE_SIZE - 30 + 6, *(table + 6) + 6, 1);
+	}
+	else {
+		HBRUSH rectangle = CreateSolidBrush(RGB(255, 255, 255));
+		SelectObject(hdc, rectangle);
+		Rectangle(hdc, 1251, 40, 1251 + 30 * TABLE_SIZE, 40 + 30 * TABLE_SIZE);
+		for (int x = 1251, i = 0; x < 1251 + 30 * TABLE_SIZE; i++, x += 30) {
+			_itoa(i, n, 15);
+			TextOut(hdc, x + 5, 25, n, 1);
+			for (int y = 40, j = 0; y < 40 + 30 * TABLE_SIZE; j++, y += 30) {
+				n[0] = 65 + j;
+				TextOut(hdc, 1251 - 15, y + 6, n, 1);
+				Rectangle(hdc, x, y, x + 30, y + 30);
+				TextOut(hdc, x + 6, y + 6, *(table + j) + i, 1);
+			}
+		}
+		TextOut(hdc, 1251 + 30 * TABLE_SIZE - 30 + 6, 40 + 30 * TABLE_SIZE - 30 + 6, *(table + 6) + 6, 1);
+		DeleteObject(rectangle);
+	}
+	SetBkMode(hdc, OPAQUE);
+}
 void bubbleSort(struct Node** head, int count)
 {
 	Node** h;
@@ -81,10 +116,12 @@ void bubbleSort(struct Node** head, int count)
 		}
 	}
 }
-char *Entering() {
+char *Entering(char **table) {
 	char *enterword = new char[30];
 	cout << "Enter word with * : ";
+	drawTable(table, 0);
 	cin >> enterword;
+	drawTable(table, 0);
 	int wordsize = strlen(enterword);
 	char *word = new char[wordsize];
 	strcpy(word, enterword);
@@ -193,14 +230,24 @@ void printList(Node *node)
 		node = node->next;
 	}
 }
-int bestV(Node *node, char *letters) {
+int bestV(Node *node, char **table) {
 	if (node == NULL) {
 		return 0;
 	}
+	char *str = new char[TABLE_SIZE];
+	int c = 0;
+	for (int i = 0; i < TABLE_SIZE; i++) {
+		for (int j = 0; j < TABLE_SIZE; j++) {
+			if (table[i][j] != ' ') {
+				str[c] = table[i][j];
+				c++;
+			}
+		}
+	}
 	int sovp = 0;
 	for (int j = 1; j < strlen(node->word)-1; j++) {
-		for (int i = 0; i < 7; i++) {
-			if (node->word[j] == letters[i]) {
+		for (int i = 0; i < c+1; i++) {
+			if (node->word[j] == str[i]) {
 				j++;
 				sovp++;
 			}
@@ -212,11 +259,11 @@ int bestV(Node *node, char *letters) {
 	else {
 		node->sovp = sovp;
 	}
-	if (sovp > bestV(node->next, letters)) {
+	if (sovp > bestV(node->next, table)) {
 		return sovp;
 	}
 }
-void find_max(struct Node*temp, char*letters) {
+void find_max(struct Node*temp, char**letters) {
 
 	if (temp != NULL) {
 		int max_value = bestV(temp, letters);
@@ -315,42 +362,7 @@ init:
 	}
 
 }
-void drawTable(char **table, bool text) {
-	char *n = new char[15];
-	SetBkMode(hdc,TRANSPARENT);
-	SetTextColor(hdc,RGB(255, 0, 0));
-	if (text == 1) {
-		for (int x = 1251, i = 0; x < 1251+30* TABLE_SIZE; i++, x += 30) {
-			_itoa(i, n, 15);
-			TextOut(hdc, x + 5, 25, n , 1);
-			for (int y = 40, j = 0; y < 40 + 30 * TABLE_SIZE; j++, y += 30) {
-				n[0] = 65 + j;
-				TextOut(hdc, 1251 - 15, y + 6, n, 1);
-				TextOut(hdc, x + 6, y + 6, *(table + j) + i, 1);
-			}
-		}
-		TextOut(hdc, 1251 + 30 * TABLE_SIZE - 30 + 6, 40 + 30 * TABLE_SIZE - 30 + 6, *(table + 6) + 6, 1);
-	}
-	else {
-		HBRUSH rectangle = CreateSolidBrush(RGB(255, 255, 255));
-		SelectObject(hdc, rectangle);
-		Rectangle(hdc, 1251, 40, 1251 + 30 * TABLE_SIZE, 40 + 30 * TABLE_SIZE);
-		for (int x = 1251, i = 0; x < 1251 + 30 * TABLE_SIZE; i++, x += 30) {
-			_itoa(i, n, 15);
-			TextOut(hdc, x + 5, 25, n, 1);
-			for (int y = 40, j = 0; y < 40 + 30 * TABLE_SIZE; j++, y += 30) {
-				n[0] = 65 + j;
-				TextOut(hdc, 1251 - 15, y + 6, n, 1);
-				Rectangle(hdc, x, y, x + 30, y + 30);
-				TextOut(hdc, x + 6, y + 6, *(table + j) + i, 1);
-			}
-		}
-		TextOut(hdc, 1251 + 30 * TABLE_SIZE - 30 + 6, 40 + 30 * TABLE_SIZE - 30 + 6, *(table + 6) + 6, 1);
-		DeleteObject(rectangle);
-	}
-	SetBkMode(hdc, OPAQUE);
-}
-COORD TableCross(char **table, char *letters) {
+COORD TableCross(char **table) {
 	drawTable(table, 0);
 	int iKey = 0;
 	int i = TABLE_SIZE/2;
@@ -446,7 +458,7 @@ bool check(char *word, int size) {
 	}
 	return 0;
 }
-bool SelectWordOnTable(char**table, char*lettres) {
+bool SelectWordOnTable(char**table) {
 	bool tab[TABLE_SIZE][TABLE_SIZE] = { 0 };
 	HBRUSH def = CreateSolidBrush(RGB(255, 255, 255));
 	HBRUSH selectR = CreateSolidBrush(RGB(0, 200, 0));
@@ -646,6 +658,58 @@ bool SelectWordOnTable(char**table, char*lettres) {
 	cout << endl;
 	return 0;
 }
+void helper(Node *&fword, int &fsize, char *&word, char**table) {
+	fword = NULL;
+	fsize = 0;
+	word = Entering(table);
+	int wanted = 0;
+	for (int i = 0; i < strlen(word); i++) {
+		if (word[i] == '*') {
+			wanted++;
+		}
+	}
+	char *file = new char[17];
+	strcpy(file, "Dictionary/");
+	strncat(file, word, 1);
+	strcat(file, ".txt");
+	char *temp = new char[30];
+	char *info = new char[800];
+	ifstream f;
+	f.open(file);
+	if (!f.is_open()) {
+		cout << "can't find" << endl;
+		system("pause");
+	}
+	else {
+		while (!f.eof()) {
+			f >> temp;
+			bool ind = false;
+			int count = 0;
+			if (strlen(word) == strlen(temp)) {
+				for (int i = 0; i < strlen(temp); i++) {
+					temp[i] = toupper(temp[i]);
+					if (word[i] == temp[i]) {
+						count++;
+					}
+				}
+				if (word[strlen(word) - 1] == '*' || word[strlen(word) - 1] == temp[strlen(temp) - 1]) {
+					ind = true;
+				}
+				if ((count >= (strlen(temp) - wanted)) && ind == true) {
+					f.getline(info, 800, '\n');
+					append(&fword, temp, info);
+					fsize++;
+				}
+			}
+			else {
+				f.ignore(600, '\n');
+			}
+		}
+		f.close();
+		bubbleSort(&fword, fsize);
+	}
+}
+
 
 int main(int argc, char *argv[]) {
 	SetConsoleTitle("Scrabble Helper");
@@ -665,65 +729,11 @@ int main(int argc, char *argv[]) {
 		}
 		cout << endl;
 	}
-	char *letters = new char[TABLE_SIZE];
-	cout << endl << "Letters : ";
-	for (int i = 0; i < TABLE_SIZE; i++) {
-		letters[i] = 65 + rand() % 25;
-		cout << letters[i] << " ";
-	}
-	cout << endl;
-start:
 	Node *fword = NULL;
+	char *word = new char[15];
 	int fsize = 0;
-	char *word = Entering();
-	int wanted = 0;
-	for (int i = 0; i < strlen(word); i++) {
-		if (word[i] == '*') {
-			wanted++;
-		}
-	}
-	char *file = new char[17];
-	strcpy(file, "Dictionary/");
-	strncat(file, word, 1);
-	strcat(file, ".txt");
-	char *temp = new char[30];
-	char *info = new char[800];
-	ifstream f;
-	f.open(file);
-	if (!f.is_open()) {
-		cout << "can't find" << endl;
-		system("pause");
-		return 0;
-	}
-	while (!f.eof()) {
-		f >> temp;
-		bool ind = false;
-		int count = 0;
-		if (strlen(word) == strlen(temp)) {
-			for (int i = 0; i < strlen(temp); i++) {
-				temp[i] = toupper(temp[i]);
-				if (word[i] == temp[i]) {
-					count++;
-				}
-			}
-			if (word[strlen(word) - 1] == '*' || word[strlen(word) - 1] == temp[strlen(temp) - 1]) {
-				ind = true;
-			}
-			if ((count >= (strlen(temp) - wanted)) && ind == true) {
-				f.getline(info, 800, '\n');
-				append(&fword, temp, info);
-				fsize++;
-			}
-		}
-		else {
-			f.ignore(600, '\n');
-		}
-	}
-	f.close();
-	bubbleSort(&fword, fsize);
 	int ind = 1;
-	int iKey = 0;
-	while (iKey != KEY_ESC) {
+	while (ind!=0) {
 		SetColor(LightCyan, Black);
 		cout << endl;
 		cout << " 1 - Enter new Word" << endl;
@@ -735,32 +745,23 @@ start:
 		switch (ind) {
 		case 1: {
 			system("cls");
-			delete temp, file, info, word, letters;
 			delete fword;
-			goto start;
+			helper(fword, fsize, word, table);
 			break;
 		}
 		case 2: {
 			system("cls");
-			cout << endl << "You letters : ";
-			for (int i = 0; i < TABLE_SIZE; i++) {
-				cout << letters[i] << " ";
-			}
 			cout << endl << "Entered word is : ";
 			for (int i = 0; i < strlen(word); i++) {
-				cout << word[i] << " ";
+				cout << *(word+i) << " ";
 			}
 			cout << endl;
-			find_max(fword, letters);
+			find_max(fword, table);
 			drawTable(table, 0);
 			break;
 		}
 		case 3: {
 			system("cls");
-			cout << endl << "You letters : ";
-			for (int i = 0; i < TABLE_SIZE; i++) {
-				cout << letters[i] << " ";
-			}
 			cout << endl << "Entered word is : ";
 			for (int i = 0; i < strlen(word); i++) {
 				cout << word[i] << " ";
@@ -782,7 +783,7 @@ start:
 			drawTable(table, 0);
 			bool ind = 0;
 			do {
-				Selected = TableCross(table, letters);
+				Selected = TableCross(table);
 				if (table[Selected.X][Selected.Y] != ' ') {
 					ind = 0;
 				}
@@ -810,7 +811,7 @@ start:
 			} while (ind == 0);
 			table[Selected.X][Selected.Y] = toupper(a);
 			drawTable(table, 0);
-			if (SelectWordOnTable(table, letters) == 0) {
+			if (SelectWordOnTable(table) == 0) {
 				table[Selected.X][Selected.Y] = ' ';
 				cout << "Error! Cant find this word in dictionary" << endl;
 			}
@@ -821,7 +822,6 @@ start:
 			break;
 		}
 		}
-		iKey = _getch();
 	}
 
 	system("pause");
