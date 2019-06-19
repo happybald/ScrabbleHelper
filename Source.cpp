@@ -12,6 +12,11 @@ CONSOLE_SCREEN_BUFFER_INFO csbInfo;
 SMALL_RECT consolRect;
 HDC hdc;
 HWND hwnd;
+#define KEY_UP 72
+#define KEY_DOWN 80
+#define KEY_LEFT 75
+#define KEY_RIGHT 77
+#define KEY_ENTER 13
 
 struct Node {
 	char word[30];
@@ -43,6 +48,9 @@ enum ConsoleColor {
 void SetColor(int text, int background) {
 	HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleTextAttribute(hStdOut, (WORD)((background << 4) | text));
+}
+WORD colorConvertTo(int ForgC, int BackC){
+	return ((BackC & 0x0F) << 4) + (ForgC & 0x0F);
 }
 struct Node* swap(struct Node* ptr1, struct Node* ptr2)
 {
@@ -255,7 +263,6 @@ void clearImg() {
 	FillRect(hdc, &rect, CreateSolidBrush(RGB(0, 0, 0)));
 	gotoxy(0, 0);
 }
-
 void initTable(char **table, int size) {
 	char *ft = new char[17];
 	strcpy(ft, "Dictionary/");
@@ -303,7 +310,6 @@ void initTable(char **table, int size) {
 	}
 	
 }
-
 void drawTable(char **table) {
 	Rectangle(hdc, 1251, 40, 1461, 250);
 	for (int x = 1251, i=0; x < 1461;i++, x += 30) {
@@ -313,8 +319,73 @@ void drawTable(char **table) {
 		}
 	}
 	TextOut(hdc, 1431 + 6, 220 + 6, *(table + 6) + 6, 1);
+}
+
+void TableCross(char **table, char *letters) {
+	int iKey = 0;
+	bool tab[7][7] = { 0 };
+	int Select = 0;
+	Rectangle(hdc, 1251, 40, 1251 + 30, 250);
+	while (iKey != KEY_ENTER) {
+		if (_kbhit()) {
+			iKey = _getch();
+			switch (iKey) {
+			case KEY_LEFT: {
+				if (Select > 0) {
+					drawTable(table);
+					Select--;
+					Rectangle(hdc, 1251 + Select * 30, 40, 1251 + Select * 30 + 30, 250);
+				}
+				break;
+			}
+			case KEY_RIGHT: {
+				if (Select < 6) {
+					drawTable(table);
+					Select++;
+					Rectangle(hdc, 1251 + Select * 30, 40, 1251 + Select * 30 + 30, 250);
+				}
+				break;
+			}
+			case KEY_ENTER: {
+				break;
+			}
+			}
+		}
+	}
+	int i = Select;
+	Select = 0;
+	iKey = 0;
+	Rectangle(hdc, 1251, 40, 1461, 40 + 30);
+	while (iKey != KEY_ENTER) {
+		if (_kbhit()) {
+			iKey = _getch();
+			switch (iKey) {
+			case KEY_UP: {
+				if (Select > 0) {
+					drawTable(table);
+					Select--;
+					Rectangle(hdc, 1251, 40 + 30 * Select, 1461, 40 + Select * 30 + 30);
+				}
+				break;
+			}
+			case KEY_DOWN: {
+				if (Select < 6) {
+					drawTable(table);
+					Select++;
+					Rectangle(hdc, 1251, 40 + 30 * Select, 1461, 40 + Select * 30 + 30);
+				}
+				break;
+			}
+			case KEY_ENTER: {
+				break;
+			}
+			}
+		}
+	}
+	cout << i << "   " << Select << endl;
 
 }
+
 
 int main(int argc, char *argv[]) {
 	SetConsoleTitle("Scrabble Helper");
@@ -440,6 +511,7 @@ int main(int argc, char *argv[]) {
 		case 4:{
 			clearImg();
 			drawTable(table);
+			TableCross(table, letters);
 			break;
 		}
 		default:
