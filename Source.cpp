@@ -17,7 +17,8 @@ HWND hwnd;
 #define KEY_LEFT 75
 #define KEY_RIGHT 77
 #define KEY_ENTER 13
-
+#define KEY_ESC 27
+#define TABLE_SIZE 9
 struct Node {
 	char word[30];
 	char info[800];
@@ -304,13 +305,13 @@ init:
 			f.ignore(600, '\n');
 		}
 	}
-	for (int i = 0; i < 7; i++) {
-		for (int j = 0; j < 7; j++) {
+	for (int i = 0; i < TABLE_SIZE; i++) {
+		for (int j = 0; j < TABLE_SIZE; j++) {
 			*(*(table + i) + j) = ' ';
 		}
 	}
-	for (int i = 0; i < 7; i++) {
-		*(*(table + 7 / 2) + i) = toupper(tmp[i]);
+	for (int i = 0; i < TABLE_SIZE; i++) {
+		*(*(table + TABLE_SIZE / 2) + i) = toupper(tmp[i]);
 	}
 
 }
@@ -319,32 +320,32 @@ void drawTable(char **table, bool text) {
 	SetBkMode(hdc,TRANSPARENT);
 	SetTextColor(hdc,RGB(255, 0, 0));
 	if (text == 1) {
-		for (int x = 1251, i = 0; x < 1461; i++, x += 30) {
+		for (int x = 1251, i = 0; x < 1251+30* TABLE_SIZE; i++, x += 30) {
 			_itoa(i, n, 15);
 			TextOut(hdc, x + 5, 25, n , 1);
-			for (int y = 40, j = 0; y < 250; j++, y += 30) {
+			for (int y = 40, j = 0; y < 40 + 30 * TABLE_SIZE; j++, y += 30) {
 				n[0] = 65 + j;
-			TextOut(hdc, 1251 - 15, y + 6, n, 1);
-			TextOut(hdc, x + 6, y + 6, *(table + j) + i, 1);
+				TextOut(hdc, 1251 - 15, y + 6, n, 1);
+				TextOut(hdc, x + 6, y + 6, *(table + j) + i, 1);
 			}
 		}
-		TextOut(hdc, 1431 + 6, 220 + 6, *(table + 6) + 6, 1);
+		TextOut(hdc, 1251 + 30 * TABLE_SIZE - 30 + 6, 40 + 30 * TABLE_SIZE - 30 + 6, *(table + 6) + 6, 1);
 	}
 	else {
 		HBRUSH rectangle = CreateSolidBrush(RGB(255, 255, 255));
 		SelectObject(hdc, rectangle);
-		Rectangle(hdc, 1251, 40, 1461, 250);
-		for (int x = 1251, i = 0; x < 1461; i++, x += 30) {
+		Rectangle(hdc, 1251, 40, 1251 + 30 * TABLE_SIZE, 40 + 30 * TABLE_SIZE);
+		for (int x = 1251, i = 0; x < 1251 + 30 * TABLE_SIZE; i++, x += 30) {
 			_itoa(i, n, 15);
 			TextOut(hdc, x + 5, 25, n, 1);
-			for (int y = 40, j = 0; y < 250; j++, y += 30) {
+			for (int y = 40, j = 0; y < 40 + 30 * TABLE_SIZE; j++, y += 30) {
 				n[0] = 65 + j;
 				TextOut(hdc, 1251 - 15, y + 6, n, 1);
 				Rectangle(hdc, x, y, x + 30, y + 30);
 				TextOut(hdc, x + 6, y + 6, *(table + j) + i, 1);
 			}
 		}
-		TextOut(hdc, 1431 + 6, 220 + 6, *(table + 6) + 6, 1);
+		TextOut(hdc, 1251 + 30 * TABLE_SIZE - 30 + 6, 40 + 30 * TABLE_SIZE - 30 + 6, *(table + 6) + 6, 1);
 		DeleteObject(rectangle);
 	}
 	SetBkMode(hdc, OPAQUE);
@@ -352,8 +353,8 @@ void drawTable(char **table, bool text) {
 COORD TableCross(char **table, char *letters) {
 	drawTable(table, 0);
 	int iKey = 0;
-	int i = 3;
-	int j = 3;
+	int i = TABLE_SIZE/2;
+	int j = TABLE_SIZE/2;
 	HBRUSH rectangle = CreateSolidBrush(RGB(0, 0, 0));
 	SelectObject(hdc, rectangle);
 	Rectangle(hdc, 1251 + i * 30, 40 + j * 30, 1251 + i * 30 + 30, 40 + j * 30 + 30);
@@ -375,7 +376,7 @@ COORD TableCross(char **table, char *letters) {
 				break;
 			}
 			case KEY_RIGHT: {
-				if (j < 6) {
+				if (j < TABLE_SIZE-1) {
 					drawTable(table, 0);
 					j++;
 					SelectObject(hdc, rectangle);
@@ -396,7 +397,7 @@ COORD TableCross(char **table, char *letters) {
 				break;
 			}
 			case KEY_DOWN: {
-				if (i < 6) {
+				if (i < TABLE_SIZE-1) {
 					drawTable(table, 0);
 					i++;
 					SelectObject(hdc, rectangle);
@@ -446,11 +447,11 @@ bool check(char *word, int size) {
 	return 0;
 }
 bool SelectWordOnTable(char**table, char*lettres) {
-	bool tab[7][7] = { 0 };
+	bool tab[TABLE_SIZE][TABLE_SIZE] = { 0 };
 	HBRUSH def = CreateSolidBrush(RGB(255, 255, 255));
 	HBRUSH selectR = CreateSolidBrush(RGB(0, 200, 0));
-	int i = 3;
-	int j = 3;
+	int i = TABLE_SIZE/2;
+	int j = TABLE_SIZE/2;
 	SelectObject(hdc, selectR);
 	Rectangle(hdc, 1251 + i * 30, 40 + j * 30, 1251 + i * 30 + 30, 40 + j * 30 + 30);
 	drawTable(table, 1);
@@ -471,7 +472,7 @@ bool SelectWordOnTable(char**table, char*lettres) {
 				break;
 			}
 			case KEY_RIGHT: {
-				if (j < 6) {
+				if (j < TABLE_SIZE-1) {
 					drawTable(table, 0);
 					j++;
 					SelectObject(hdc, selectR);
@@ -492,7 +493,7 @@ bool SelectWordOnTable(char**table, char*lettres) {
 				break;
 			}
 			case KEY_DOWN: {
-				if (i < 6) {
+				if (i < TABLE_SIZE-1) {
 					drawTable(table, 0);
 					i++;
 					SelectObject(hdc, selectR);
@@ -551,7 +552,7 @@ bool SelectWordOnTable(char**table, char*lettres) {
 				break;
 			}
 			case KEY_RIGHT: {
-				if (j < 6 && tab[i][j + 1] == 0) {
+				if (j < TABLE_SIZE-1 && tab[i][j + 1] == 0) {
 					drawTable(table, 1);
 					j++;
 					tab[i][j] = 1;
@@ -563,7 +564,7 @@ bool SelectWordOnTable(char**table, char*lettres) {
 					SelectObject(hdc, selectR);
 				}
 				else {
-					if (j < 6 && tab[i][j + 1] == 1) {
+					if (j < TABLE_SIZE-1 && tab[i][j + 1] == 1) {
 						drawTable(table, 1);
 						SelectObject(hdc, def);
 						Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
@@ -603,7 +604,7 @@ bool SelectWordOnTable(char**table, char*lettres) {
 				break;
 			}
 			case KEY_DOWN: {
-				if (i < 6 && tab[i + 1][j] == 0) {
+				if (i < TABLE_SIZE-1 && tab[i + 1][j] == 0) {
 					drawTable(table, 1);
 					i++;
 					tab[i][j] = 1;
@@ -615,7 +616,7 @@ bool SelectWordOnTable(char**table, char*lettres) {
 					SelectObject(hdc, selectR);
 				}
 				else {
-					if (i < 6 && tab[i + 1][j] == 1) {
+					if (i < TABLE_SIZE-1 && tab[i + 1][j] == 1) {
 						drawTable(table, 1);
 						SelectObject(hdc, def);
 						Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
@@ -652,26 +653,26 @@ int main(int argc, char *argv[]) {
 	hwnd = GetConsoleWindow();
 	SetColor(White, Black);
 	srand(time(NULL));
-	char **table = new char*[7];
-	for (int i = 0; i < 7; i++) {
-		table[i] = new char[7];
+	char **table = new char*[TABLE_SIZE];
+	for (int i = 0; i < TABLE_SIZE; i++) {
+		table[i] = new char[TABLE_SIZE];
 	}
-	
-	initTable(table, 7);
-	for (int i = 0; i < 7; i++) {
-		for (int j = 0; j < 7; j++) {
-			cout << table[i][j]<<" ";
+
+	initTable(table, TABLE_SIZE);
+	for (int i = 0; i < TABLE_SIZE; i++) {
+		for (int j = 0; j < TABLE_SIZE; j++) {
+			cout << table[i][j] << " ";
 		}
 		cout << endl;
 	}
-	char *letters = new char[7];
-	cout <<endl<< "Letters : ";
-	for (int i = 0; i < 7; i++) {
+	char *letters = new char[TABLE_SIZE];
+	cout << endl << "Letters : ";
+	for (int i = 0; i < TABLE_SIZE; i++) {
 		letters[i] = 65 + rand() % 25;
 		cout << letters[i] << " ";
 	}
 	cout << endl;
-	start:
+start:
 	Node *fword = NULL;
 	int fsize = 0;
 	char *word = Entering();
@@ -721,7 +722,8 @@ int main(int argc, char *argv[]) {
 	f.close();
 	bubbleSort(&fword, fsize);
 	int ind = 1;
-	while (ind != 0) {
+	int iKey = 0;
+	while (iKey != KEY_ESC) {
 		SetColor(LightCyan, Black);
 		cout << endl;
 		cout << " 1 - Enter new Word" << endl;
@@ -732,6 +734,7 @@ int main(int argc, char *argv[]) {
 		cin >> ind;
 		switch (ind) {
 		case 1: {
+			system("cls");
 			delete temp, file, info, word, letters;
 			delete fword;
 			goto start;
@@ -740,7 +743,7 @@ int main(int argc, char *argv[]) {
 		case 2: {
 			system("cls");
 			cout << endl << "You letters : ";
-			for (int i = 0; i < 7; i++) {
+			for (int i = 0; i < TABLE_SIZE; i++) {
 				cout << letters[i] << " ";
 			}
 			cout << endl << "Entered word is : ";
@@ -755,7 +758,7 @@ int main(int argc, char *argv[]) {
 		case 3: {
 			system("cls");
 			cout << endl << "You letters : ";
-			for (int i = 0; i < 7; i++) {
+			for (int i = 0; i < TABLE_SIZE; i++) {
 				cout << letters[i] << " ";
 			}
 			cout << endl << "Entered word is : ";
@@ -818,7 +821,9 @@ int main(int argc, char *argv[]) {
 			break;
 		}
 		}
+		iKey = _getch();
 	}
+
 	system("pause");
 	return 0;
 }
