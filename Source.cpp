@@ -309,7 +309,6 @@ void drawTable(char **table) {
 	for (int x = 1251, i=0; x < 1461;i++, x += 30) {
 		for (int y = 40, j = 0; y < 250;j++, y += 30) {
 			Rectangle(hdc, x, y, x + 30, y + 30);
-			Sleep(20);
 			TextOut(hdc, x+6, y+6, *(table+j)+i, 1);
 		}
 	}
