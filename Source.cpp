@@ -348,10 +348,10 @@ int main(int argc, char *argv[]) {
 	char *word = Entering();
 	int wanted = 0;
 	for (int i = 0; i < strlen(word); i++) {
-		if (word[i] == '*') 
+		if (word[i] == '*') {
 			wanted++;
 		}
-
+	}
 	char *file = new char[17];
 	strcpy(file, "Dictionary/");
 	strncat(file, word, 1);
