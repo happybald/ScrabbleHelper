@@ -264,16 +264,17 @@ void clearImg() {
 	gotoxy(0, 0);
 }
 void initTable(char **table, int size) {
+init:
+	int c = 0;
 	char *ft = new char[17];
 	strcpy(ft, "Dictionary/");
 	char *word = new char[1];
+	char *tmp = new char[20];
 	word[0] = 65 + rand() % 25;
 	strncat(ft, word, 1);
 	strcat(ft, ".txt");
-	char *tmp = new char[20];
 	ifstream f;
 	f.open(ft);
-	int c = 0;
 	while (!f.eof()) {
 		f >> tmp;
 		if (strlen(tmp) == size) {
@@ -285,6 +286,9 @@ void initTable(char **table, int size) {
 	}
 	f.close();
 	f.open(ft);
+	if (c == 0) {
+		goto init;
+	}
 	int r = rand() % c;
 	c = 0;
 	while (!f.eof()) {
@@ -302,13 +306,13 @@ void initTable(char **table, int size) {
 	}
 	for (int i = 0; i < 7; i++) {
 		for (int j = 0; j < 7; j++) {
-			*(*(table + i) + j) = '+';
+			*(*(table + i) + j) = ' ';
 		}
 	}
 	for (int i = 0; i < 7; i++) {
-		*(*(table+7/2)+i) = tmp[i];
+		*(*(table + 7 / 2) + i) = toupper(tmp[i]);
 	}
-	
+
 }
 void drawTable(char **table, bool text) {
 	char *n = new char[15];
@@ -414,14 +418,40 @@ COORD TableCross(char **table, char *letters) {
 	DeleteObject(rectangle);
 	return ret;
 }
-void SelectWordOnTable(char**table, char*lettres) {
+bool check(char *word, int size) {
+	char *ft = new char[17];
+	strcpy(ft, "Dictionary/");
+	strncat(ft, word, 1);
+	strcat(ft, ".txt");
+	char *tmp = new char[20];
+	ifstream f;
+	f.open(ft);
+	int c = 0;
+	while (!f.eof()) {
+		f >> tmp;
+		if (strlen(tmp) == size) {
+			int c= 0;
+			for (int i = 0; i < size; i++) {
+				if (toupper(tmp[i]) == word[i]) {
+					c++;
+				}
+				if (c == size) {
+					return 1;
+				}
+			}
+		}
+
+		f.ignore(600, '\n');
+	}
+	return 0;
+}
+bool SelectWordOnTable(char**table, char*lettres) {
 	bool tab[7][7] = { 0 };
-	HBRUSH rectangle = CreateSolidBrush(RGB(0, 0, 0));
 	HBRUSH def = CreateSolidBrush(RGB(255, 255, 255));
 	HBRUSH selectR = CreateSolidBrush(RGB(0, 200, 0));
 	int i = 3;
 	int j = 3;
-	SelectObject(hdc, rectangle);
+	SelectObject(hdc, selectR);
 	Rectangle(hdc, 1251 + i * 30, 40 + j * 30, 1251 + i * 30 + 30, 40 + j * 30 + 30);
 	drawTable(table, 1);
 	int iKey = 0;
@@ -433,10 +463,10 @@ void SelectWordOnTable(char**table, char*lettres) {
 				if (j > 0) {
 					drawTable(table, 0);
 					j--;
-					SelectObject(hdc, rectangle);
+					SelectObject(hdc, selectR);
 					Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
 					drawTable(table, 1);
-					SelectObject(hdc, rectangle);
+					SelectObject(hdc, selectR);
 				}
 				break;
 			}
@@ -444,20 +474,20 @@ void SelectWordOnTable(char**table, char*lettres) {
 				if (j < 6) {
 					drawTable(table, 0);
 					j++;
-					SelectObject(hdc, rectangle);
+					SelectObject(hdc, selectR);
 					Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
 					drawTable(table, 1);
-					SelectObject(hdc, rectangle);
+					SelectObject(hdc, selectR);
 				}
 				break;
 			}case KEY_UP: {
 				if (i > 0) {
 					drawTable(table, 0);
 					i--;
-					SelectObject(hdc, rectangle);
+					SelectObject(hdc, selectR);
 					Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
 					drawTable(table, 1);
-					SelectObject(hdc, rectangle);
+					SelectObject(hdc, selectR);
 				}
 				break;
 			}
@@ -465,10 +495,10 @@ void SelectWordOnTable(char**table, char*lettres) {
 				if (i < 6) {
 					drawTable(table, 0);
 					i++;
-					SelectObject(hdc, rectangle);
+					SelectObject(hdc, selectR);
 					Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
 					drawTable(table, 1);
-					SelectObject(hdc, rectangle);
+					SelectObject(hdc, selectR);
 				}
 				break;
 			}
@@ -482,11 +512,14 @@ void SelectWordOnTable(char**table, char*lettres) {
 	iKey = 0;
 	Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
 	drawTable(table, 1);
+	char *selectedword = new char[49];
 	tab[i][j] = 2;
 	COORD cent;
 	cent.X = i;
 	cent.Y = j;
 	Sleep(50);
+	int pos = 0;
+	selectedword[0] = table[i][j];
 	while (iKey != KEY_ENTER) {
 		if (_kbhit()) {
 			iKey = _getch();
@@ -496,6 +529,8 @@ void SelectWordOnTable(char**table, char*lettres) {
 					drawTable(table, 1);
 					j--;
 					tab[i][j] = 1;
+					pos++;
+					selectedword[pos] = table[i][j];
 					SelectObject(hdc, selectR);
 					Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
 					drawTable(table, 1);
@@ -508,6 +543,7 @@ void SelectWordOnTable(char**table, char*lettres) {
 						Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
 						tab[i][j] = 0;
 						j--;
+						pos--;
 						drawTable(table, 1);
 						SelectObject(hdc, def);
 					}
@@ -519,6 +555,8 @@ void SelectWordOnTable(char**table, char*lettres) {
 					drawTable(table, 1);
 					j++;
 					tab[i][j] = 1;
+					pos++;
+					selectedword[pos] = table[i][j];
 					SelectObject(hdc, selectR);
 					Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
 					drawTable(table, 1);
@@ -531,6 +569,7 @@ void SelectWordOnTable(char**table, char*lettres) {
 						Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
 						tab[i][j] = 0;
 						j++;
+						pos--;
 						drawTable(table, 1);
 						SelectObject(hdc, def);
 					}
@@ -542,6 +581,8 @@ void SelectWordOnTable(char**table, char*lettres) {
 					drawTable(table, 1);
 					i--;
 					tab[i][j] = 1;
+					pos++;
+					selectedword[pos] = table[i][j];
 					SelectObject(hdc, selectR);
 					Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
 					drawTable(table, 1);
@@ -554,6 +595,7 @@ void SelectWordOnTable(char**table, char*lettres) {
 						Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
 						tab[i][j] = 0;
 						i--;
+						pos--;
 						drawTable(table, 1);
 						SelectObject(hdc, def);
 					}
@@ -565,6 +607,8 @@ void SelectWordOnTable(char**table, char*lettres) {
 					drawTable(table, 1);
 					i++;
 					tab[i][j] = 1;
+					pos++;
+					selectedword[pos] = table[i][j];
 					SelectObject(hdc, selectR);
 					Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
 					drawTable(table, 1);
@@ -577,6 +621,7 @@ void SelectWordOnTable(char**table, char*lettres) {
 						Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
 						tab[i][j] = 0;
 						i++;
+						pos--;
 						drawTable(table, 1);
 						SelectObject(hdc, def);
 					}
@@ -589,12 +634,16 @@ void SelectWordOnTable(char**table, char*lettres) {
 			}
 		}
 	}
-	for (int i = 0; i < 7; i++) {
-		for (int j = 0; j < 7; j++) {
-			cout << tab[i][j] << "  ";
-		}
-		cout << endl;
+	for (int i = 0; i < pos+1; i++) {
+		cout << selectedword[i];
 	}
+	if (check(selectedword, pos + 1) == 1) {
+		cout << "	Nice true word!" << endl;
+		drawTable(table, 0);
+		return 1;
+	}
+	cout << endl;
+	return 0;
 }
 
 int main(int argc, char *argv[]) {
@@ -718,17 +767,56 @@ int main(int argc, char *argv[]) {
 			drawTable(table, 0);
 			break;
 		}
-		case 4:{
-			clearImg();
+		case 4: {
+			system("cls");
+			COORD Selected;
+			char a;
+			do {
+				cout << "Enter the Letter what you want to paste : ";
+				drawTable(table, 0);
+				cin >> a;
+			} while (a < 65 || a>90);
 			drawTable(table, 0);
-			COORD Selected = TableCross(table, letters);
-			cout << Selected.X << "  " << Selected.Y;
+			bool ind = 0;
+			do {
+				Selected = TableCross(table, letters);
+				if (table[Selected.X][Selected.Y] != ' ') {
+					ind = 0;
+				}
+				else {
+					if (Selected.X > 0 && table[Selected.X - 1][Selected.Y] != ' ') {
+						ind = 1;
+						break;
+					}
+					if (Selected.X < 6 && table[Selected.X + 1][Selected.Y] != ' ') {
+						ind = 1;
+						break;
+					}
+					if (Selected.Y < 0 && table[Selected.X][Selected.Y - 1] != ' ') {
+						ind = 1;
+						break;
+					}
+					if (Selected.Y < 6 && table[Selected.X][Selected.Y + 1] != ' ') {
+						ind = 1;
+						break;
+					}
+				}
+				if (ind == 0) {
+					cout << "Error!" << endl;
+				}
+			} while (ind == 0);
+			table[Selected.X][Selected.Y] = toupper(a);
 			drawTable(table, 0);
-			SelectWordOnTable(table, letters);
+			if (SelectWordOnTable(table, letters) == 0) {
+				table[Selected.X][Selected.Y] = ' ';
+				cout << "Error! Cant find this word in dictionary" << endl;
+			}
+			drawTable(table, 0);
 			break;
 		}
-		default:
+		default: {
 			break;
+		}
 		}
 	}
 	system("pause");
