@@ -110,13 +110,17 @@ struct Node* swap(struct Node* ptr1, struct Node* ptr2)
 	ptr1->next = tmp;
 	return ptr2;
 }
-void drawTable(char **table, bool text) {
+void drawTable(char **table, bool text,int score) {
 	char *n = new char[15];
 	SetBkMode(hdc, TRANSPARENT);
 	SetTextColor(hdc, RGB(255, 0, 0));
+	Rectangle(hdc, 1110, 40, 1200, 80);
+	TextOut(hdc, 1115, 45, LPCSTR("Your score :"), 13); SetBkMode(hdc, TRANSPARENT);
+	_itoa(score, n, 10);
+	TextOut(hdc, 1115, 60, n, 0); 
 	if (text == 1) {
 		for (int x = 1251, i = 0; x < 1251 + 30 * TABLE_SIZE; i++, x += 30) {
-			_itoa(i, n, 15);
+			_itoa(i, n, 10);
 			TextOut(hdc, x + 5, 25, n, 1);
 			for (int y = 40, j = 0; y < 40 + 30 * TABLE_SIZE; j++, y += 30) {
 				n[0] = 65 + j;
@@ -131,7 +135,7 @@ void drawTable(char **table, bool text) {
 		SelectObject(hdc, rectangle);
 		Rectangle(hdc, 1251, 40, 1251 + 30 * TABLE_SIZE, 40 + 30 * TABLE_SIZE);
 		for (int x = 1251, i = 0; x < 1251 + 30 * TABLE_SIZE; i++, x += 30) {
-			_itoa(i, n, 15);
+			_itoa(i, n, 10);
 			TextOut(hdc, x + 5, 25, n, 1);
 			for (int y = 40, j = 0; y < 40 + 30 * TABLE_SIZE; j++, y += 30) {
 				n[0] = 65 + j;
@@ -368,15 +372,15 @@ init:
 	}
 
 }
-COORD TableCross(char **table) {
-	drawTable(table, 0);
+COORD TableCross(char **table, int score) {
+	drawTable(table, 0,score);
 	int iKey = 0;
 	int i = TABLE_SIZE / 2;
 	int j = TABLE_SIZE / 2;
 	HBRUSH rectangle = CreateSolidBrush(RGB(0, 0, 0));
 	SelectObject(hdc, rectangle);
 	Rectangle(hdc, 1251 + i * 30, 40 + j * 30, 1251 + i * 30 + 30, 40 + j * 30 + 30);
-	drawTable(table, 1);
+	drawTable(table, 1, score);
 	SelectObject(hdc, rectangle);
 	while (iKey != KEY_ENTER) {
 		if (_kbhit()) {
@@ -384,43 +388,43 @@ COORD TableCross(char **table) {
 			switch (iKey) {
 			case KEY_LEFT: {
 				if (j > 0) {
-					drawTable(table, 0);
+					drawTable(table, 0, score);
 					j--;
 					SelectObject(hdc, rectangle);
 					Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
-					drawTable(table, 1);
+					drawTable(table, 1, score);
 					SelectObject(hdc, rectangle);
 				}
 				break;
 			}
 			case KEY_RIGHT: {
 				if (j < TABLE_SIZE - 1) {
-					drawTable(table, 0);
+					drawTable(table, 0, score);
 					j++;
 					SelectObject(hdc, rectangle);
 					Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
-					drawTable(table, 1);
+					drawTable(table, 1, score);
 					SelectObject(hdc, rectangle);
 				}
 				break;
 			}case KEY_UP: {
 				if (i > 0) {
-					drawTable(table, 0);
+					drawTable(table, 0, score);
 					i--;
 					SelectObject(hdc, rectangle);
 					Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
-					drawTable(table, 1);
+					drawTable(table, 1, score);
 					SelectObject(hdc, rectangle);
 				}
 				break;
 			}
 			case KEY_DOWN: {
 				if (i < TABLE_SIZE - 1) {
-					drawTable(table, 0);
+					drawTable(table, 0, score);
 					i++;
 					SelectObject(hdc, rectangle);
 					Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
-					drawTable(table, 1);
+					drawTable(table, 1, score);
 					SelectObject(hdc, rectangle);
 				}
 				break;
@@ -464,7 +468,7 @@ bool check(char *word, int size) {
 	}
 	return 0;
 }
-bool SelectWordOnTable(char**table, int&res) {
+bool SelectWordOnTable(char**table, int&score) {
 	bool tab[TABLE_SIZE][TABLE_SIZE] = { 0 };
 	HBRUSH def = CreateSolidBrush(RGB(255, 255, 255));
 	HBRUSH selectR = CreateSolidBrush(RGB(0, 200, 0));
@@ -472,7 +476,7 @@ bool SelectWordOnTable(char**table, int&res) {
 	int j = TABLE_SIZE / 2;
 	SelectObject(hdc, selectR);
 	Rectangle(hdc, 1251 + i * 30, 40 + j * 30, 1251 + i * 30 + 30, 40 + j * 30 + 30);
-	drawTable(table, 1);
+	drawTable(table, 1, score);
 	int iKey = 0;
 	while (iKey != KEY_ENTER) {
 		if (_kbhit()) {
@@ -480,43 +484,43 @@ bool SelectWordOnTable(char**table, int&res) {
 			switch (iKey) {
 			case KEY_LEFT: {
 				if (j > 0) {
-					drawTable(table, 0);
+					drawTable(table, 0, score);
 					j--;
 					SelectObject(hdc, selectR);
 					Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
-					drawTable(table, 1);
+					drawTable(table, 1, score);
 					SelectObject(hdc, selectR);
 				}
 				break;
 			}
 			case KEY_RIGHT: {
 				if (j < TABLE_SIZE - 1) {
-					drawTable(table, 0);
+					drawTable(table, 0, score);
 					j++;
 					SelectObject(hdc, selectR);
 					Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
-					drawTable(table, 1);
+					drawTable(table, 1, score);
 					SelectObject(hdc, selectR);
 				}
 				break;
 			}case KEY_UP: {
 				if (i > 0) {
-					drawTable(table, 0);
+					drawTable(table, 0, score);
 					i--;
 					SelectObject(hdc, selectR);
 					Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
-					drawTable(table, 1);
+					drawTable(table, 1, score);
 					SelectObject(hdc, selectR);
 				}
 				break;
 			}
 			case KEY_DOWN: {
 				if (i < TABLE_SIZE - 1) {
-					drawTable(table, 0);
+					drawTable(table, 0, score);
 					i++;
 					SelectObject(hdc, selectR);
 					Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
-					drawTable(table, 1);
+					drawTable(table, 1, score);
 					SelectObject(hdc, selectR);
 				}
 				break;
@@ -530,7 +534,7 @@ bool SelectWordOnTable(char**table, int&res) {
 	SelectObject(hdc, selectR);
 	iKey = 0;
 	Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
-	drawTable(table, 1);
+	drawTable(table, 1, score);
 	char *selectedword = new char[TABLE_SIZE*TABLE_SIZE];
 	tab[i][j] = 2;
 	COORD cent;
@@ -545,25 +549,25 @@ bool SelectWordOnTable(char**table, int&res) {
 			switch (iKey) {
 			case KEY_LEFT: {
 				if (j > 0 && tab[i][j - 1] == 0) {
-					drawTable(table, 1);
+					drawTable(table, 1, score);
 					j--;
 					tab[i][j] = 1;
 					pos++;
 					selectedword[pos] = table[i][j];
 					SelectObject(hdc, selectR);
 					Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
-					drawTable(table, 1);
+					drawTable(table, 1, score);
 					SelectObject(hdc, selectR);
 				}
 				else {
 					if (j > 0 && tab[i][j - 1] == 1) {
-						drawTable(table, 1);
+						drawTable(table, 1, score);
 						SelectObject(hdc, def);
 						Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
 						tab[i][j] = 0;
 						j--;
 						pos--;
-						drawTable(table, 1);
+						drawTable(table, 1, score);
 						SelectObject(hdc, def);
 					}
 				}
@@ -571,25 +575,25 @@ bool SelectWordOnTable(char**table, int&res) {
 			}
 			case KEY_RIGHT: {
 				if (j < TABLE_SIZE - 1 && tab[i][j + 1] == 0) {
-					drawTable(table, 1);
+					drawTable(table, 1, score);
 					j++;
 					tab[i][j] = 1;
 					pos++;
 					selectedword[pos] = table[i][j];
 					SelectObject(hdc, selectR);
 					Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
-					drawTable(table, 1);
+					drawTable(table, 1, score);
 					SelectObject(hdc, selectR);
 				}
 				else {
 					if (j < TABLE_SIZE - 1 && tab[i][j + 1] == 1) {
-						drawTable(table, 1);
+						drawTable(table, 1, score);
 						SelectObject(hdc, def);
 						Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
 						tab[i][j] = 0;
 						j++;
 						pos--;
-						drawTable(table, 1);
+						drawTable(table, 1, score);
 						SelectObject(hdc, def);
 					}
 				}
@@ -597,25 +601,25 @@ bool SelectWordOnTable(char**table, int&res) {
 			}
 			case KEY_UP: {
 				if (i > 0 && tab[i - 1][j] == 0) {
-					drawTable(table, 1);
+					drawTable(table, 1, score);
 					i--;
 					tab[i][j] = 1;
 					pos++;
 					selectedword[pos] = table[i][j];
 					SelectObject(hdc, selectR);
 					Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
-					drawTable(table, 1);
+					drawTable(table, 1, score);
 					SelectObject(hdc, selectR);
 				}
 				else {
 					if (i > 0 && tab[i - 1][j] == 1) {
-						drawTable(table, 1);
+						drawTable(table, 1, score);
 						SelectObject(hdc, def);
 						Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
 						tab[i][j] = 0;
 						i--;
 						pos--;
-						drawTable(table, 1);
+						drawTable(table, 1, score);
 						SelectObject(hdc, def);
 					}
 				}
@@ -623,25 +627,25 @@ bool SelectWordOnTable(char**table, int&res) {
 			}
 			case KEY_DOWN: {
 				if (i < TABLE_SIZE - 1 && tab[i + 1][j] == 0) {
-					drawTable(table, 1);
+					drawTable(table, 1, score);
 					i++;
 					tab[i][j] = 1;
 					pos++;
 					selectedword[pos] = table[i][j];
 					SelectObject(hdc, selectR);
 					Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
-					drawTable(table, 1);
+					drawTable(table, 1, score);
 					SelectObject(hdc, selectR);
 				}
 				else {
 					if (i < TABLE_SIZE - 1 && tab[i + 1][j] == 1) {
-						drawTable(table, 1);
+						drawTable(table, 1, score);
 						SelectObject(hdc, def);
 						Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
 						tab[i][j] = 0;
 						i++;
 						pos--;
-						drawTable(table, 1);
+						drawTable(table, 1, score);
 						SelectObject(hdc, def);
 					}
 				}
@@ -658,8 +662,8 @@ bool SelectWordOnTable(char**table, int&res) {
 	}
 	if (check(selectedword, pos + 1) == 1) {
 		cout << "	Nice true word!" << endl;
-		res += pointscount(selectedword, pos + 1);
-		drawTable(table, 0);
+		score += pointscount(selectedword, pos + 1);
+		drawTable(table, 0,score);
 		return 1;
 	}
 	cout << endl;
@@ -761,15 +765,13 @@ int main(int argc, char *argv[]) {
 	int fsize = 0;
 	int ind = 1;
 	int res = 0;
-	drawTable(table, 0);
+	drawTable(table, 0, res);
 	while (ind != 0) {
 		SetColor(LightCyan, Black);
 		cout << endl;
 		cout << " 1 - Show points for letters" << endl;
-		cout << " 2 - Enter new Word" << endl;
-		cout << " 3 - Show best variant" << endl;
-		cout << " 4 - Show all variants" << endl;
-		cout << " 5 - Drop on table" << endl;
+		cout << " 2 - Get Help" << endl;
+		cout << " 3 - Drop on table" << endl;
 		SetColor(White, Black);
 		cin >> ind;
 		switch (ind) {
@@ -786,7 +788,7 @@ int main(int argc, char *argv[]) {
 			cout << "\t5 - K" << endl << endl;
 			cout << "\t8 - J, X" << endl << endl;
 			cout << "\t10 - Q, Z" << endl << endl;
-			drawTable(table, 0);
+			drawTable(table, 0, res);
 			break;
 		}
 		case 2: {
@@ -795,38 +797,22 @@ int main(int argc, char *argv[]) {
 			helper(fword, fsize, word, wordsize, table);
 			removeDuplicates(fword);
 			printList(fword);
-			drawTable(table, 0);
+			drawTable(table, 0, res);
 			break;
 		}
 		case 3: {
-			system("cls");
-			drawTable(table, 0);
-			break;
-		}
-		case 4: {
-			system("cls");
-			cout << endl << "Entered word is : ";
-			for (int i = 0; i < strlen(word); i++) {
-				cout << word[i] << " ";
-			}
-			cout << endl;
-			printList(fword);
-			drawTable(table, 0);
-			break;
-		}
-		case 5: {
 			system("cls");
 			COORD Selected;
 			char a;
 			do {
 				cout << "Enter the Letter what you want to paste : ";
-				drawTable(table, 0);
+				drawTable(table, 0, res);
 				cin >> a;
 			} while (a < 65 || a>90);
-			drawTable(table, 0);
+			drawTable(table, 0, res);
 			bool ind = 0;
 			do {
-				Selected = TableCross(table);
+				Selected = TableCross(table,res);
 				if (table[Selected.X][Selected.Y] != ' ') {
 					ind = 0;
 				}
@@ -853,13 +839,13 @@ int main(int argc, char *argv[]) {
 				}
 			} while (ind == 0);
 			table[Selected.X][Selected.Y] = toupper(a);
-			drawTable(table, 0);
+			drawTable(table, 0, res);
 			if (SelectWordOnTable(table, res) == 0) {
 				table[Selected.X][Selected.Y] = ' ';
 				cout << "Error! Cant find this word in dictionary" << endl;
 			}
 			cout << res << endl;
-			drawTable(table, 0);
+			drawTable(table, 0, res);
 			break;
 		}
 		default: {
