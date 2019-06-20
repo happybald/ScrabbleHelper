@@ -117,7 +117,7 @@ void drawTable(char **table, bool text,int score) {
 	Rectangle(hdc, 1110, 40, 1200, 80);
 	TextOut(hdc, 1115, 45, LPCSTR("Your score :"), 13); SetBkMode(hdc, TRANSPARENT);
 	_itoa(score, n, 10);
-	TextOut(hdc, 1115, 60, n, 0); 
+	TextOut(hdc, 1115, 60, n, 3 ); 
 	if (text == 1) {
 		for (int x = 1251, i = 0; x < 1251 + 30 * TABLE_SIZE; i++, x += 30) {
 			_itoa(i, n, 10);
