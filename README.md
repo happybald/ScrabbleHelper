@@ -1,2 +1,2 @@
 Exam task
-![Image](src.png)
+![Image](/src.png)
