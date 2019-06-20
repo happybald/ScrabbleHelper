@@ -20,7 +20,7 @@ HWND hwnd;
 #define KEY_RIGHT 77
 #define KEY_ENTER 13
 #define KEY_ESC 27
-#define TABLE_SIZE 9
+#define TABLE_SIZE 11
 struct Node {
 	char word[30];
 	char *info = new char[800];
@@ -166,23 +166,6 @@ void bubbleSort(struct Node** head, int count)
 		}
 	}
 }
-char *Entering(char **table) {
-	int size;
-	cout << "Enter size of the word :";
-	cin >> size;
-	char *enterword = new char[size];
-	cout << "Enter word with * : ";
-	drawTable(table, 0);
-	cin >> enterword;
-	drawTable(table, 0);
-	int wordsize = strlen(enterword);
-	char *word = new char[wordsize];
-	strcpy(word, enterword);
-	for (int i = 0; i < strlen(word); i++) {
-		word[i] = toupper(word[i]);
-	}
-	return word;
-}
 int pointscount(char*word,int size) {
 	int i = 0;
 	for (int c = 0; c < size; c++) {
@@ -319,62 +302,6 @@ char *removeDuplicates(char *arr, int &size) {
 	}
 	return whitelist;
 }
-/*int bestV(Node *node, char **table, char*str,int size) {
-	if (node == NULL) {
-		return 0;
-	}
-	int sovp = 0;
-	for (int j = 1; j < strlen(node->word)-1; j++) {
-		for (int i = 0; i < size; i++) {
-			if (node->word[j] == str[i]) {
-				j++;
-				sovp++;
-			}
-		}
-	}
-	if (sovp >= (strlen(node->word))/2) {
-		node->sovp = 100;
-	}
-	else {
-		node->sovp = sovp;
-	}
-	if (sovp > bestV(node->next, table)) {
-		return sovp;
-	}
-}
-void find_max(struct Node*temp, char**table) {
-
-	if (temp != NULL) {
-		int max_value = bestV(temp, table);
-		while (temp != NULL) {
-			if (temp->sovp >= max_value) {
-				for (int i = 0; i < 20; i++) {
-					cout << "-";
-				}
-				cout << endl;
-				if (temp->sovp == 100) {
-					SetColor(Yellow, Black);
-				}
-				else {
-					SetColor(White, Red);
-				}
-				cout << "   Best word for you : ";
-				SetColor(Red, White);
-				cout << "   " << temp->word << "   ";
-				SetColor(White, Red);
-				cout << "   Points : ";
-				SetColor(Red, White);
-				cout << "  " << temp->points << "   " << endl;
-				SetColor(LightGreen, Black);
-				cout << "\t\t\tDescription" << endl;
-				cout << " \t\t\t" << temp->info << endl;
-				SetColor(White, Black);
-				cout << endl << endl << endl;
-			}
-			temp = temp->next;
-		}
-	}
-}*/
 void gotoxy(int x, int y)
 {
 	COORD Gon = { x, y };
@@ -604,7 +531,7 @@ bool SelectWordOnTable(char**table,int&res) {
 	iKey = 0;
 	Rectangle(hdc, 1251 + j * 30, 40 + i * 30, 1251 + j * 30 + 30, 40 + i * 30 + 30);
 	drawTable(table, 1);
-	char *selectedword = new char[49];
+	char *selectedword = new char[TABLE_SIZE*TABLE_SIZE];
 	tab[i][j] = 2;
 	COORD cent;
 	cent.X = i;
@@ -757,7 +684,7 @@ void helper(Node *&fword, int &fsize, char *&word,int &wordsize,char**table) {
 	}
 	wordsize = c;
 	cout << endl;
-	for (int letters = 1; letters<=TABLE_SIZE; letters++) {
+	for (int letters = 0; letters<=TABLE_SIZE; letters++) {
 		for (int strpos = 0; strpos < c; strpos++) {
 			char *file = new char[17];
 			strcpy(file, "Dictionary/");
@@ -783,7 +710,7 @@ void helper(Node *&fword, int &fsize, char *&word,int &wordsize,char**table) {
 							}
 						}
 					}
-					if (ind == true && count >= letters) {
+					if (ind == true && count > letters-1) {
 						f.getline(info, 800, '\n');
 						append(&fword, temp, info);
 						fsize++;
